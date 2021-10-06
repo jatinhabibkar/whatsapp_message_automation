@@ -1,0 +1,9 @@
+gspread
+oauth2client
+clipboard
+google-api-python-client 
+google-auth-httplib2 
+google-auth-oauthlib
+clipboard
+selenium
+inquirer
