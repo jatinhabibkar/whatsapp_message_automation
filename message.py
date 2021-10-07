@@ -73,7 +73,7 @@ def getready():
         sys.exit()
 
 getready()
-for usr in users[:]: #send to only  top 2 users 
+for usr in users[:]:
 
     data={
         'usr':usr['NAME'],
