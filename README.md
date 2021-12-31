@@ -7,6 +7,7 @@
 
 * Using selenium and gcp api we can fetch data and format large number of user specific messages and forward them at a given point of time
 
+* This kind of messaging System increase the company sales by 30%
 
 ## System Design of the project
 ![System Design](./image/systemDesign.png)
