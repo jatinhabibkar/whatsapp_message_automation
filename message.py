@@ -1,16 +1,27 @@
 from modules.messageModule import DriveAuth
 from oauth2client.service_account import ServiceAccountCredentials
 from modules.messageModule import *
-import os,time,csv,clipboard,sys,inquirer,gspread,pyperclip
+import os
+import time
+import csv
+import clipboard
+import sys
+import inquirer
+import gspread
+import pyperclip
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 # variable and sheet names
-SHEET_NAME_DOB_DATE="SHEET_NAME"
-SHORT_MESSAGE="SHEET_NAME"
-DEFAULT_MESSAGE='textmessage.txt'
-WD_PATH="DRIVER_PATH"
+SHEET_NAME_DOB_DATE = "SHEET_NAME"
+SHORT_MESSAGE = "SHEET_NAME"
+DEFAULT_MESSAGE = 'textmessage.txt'
+file = open('failed.txt', 'w', encoding="utf-8")
+file.write('FAILED MESSAGES\n')
 # variable and sheet names
 
 
@@ -40,63 +51,70 @@ WD_PATH="DRIVER_PATH"
 #     print(finalmsg)
 
 
-
 try:
-    dr = DriveAuth() 
+    dr = DriveAuth()
 except Exception as e:
-    print(e,"something happend in auth")
+    print(e, "something happend in auth")
 
 # real uers
-users=dr.getData_sheet(SHEET_NAME_DOB_DATE)
+users = dr.get_data_sheet(SHEET_NAME_DOB_DATE)
 
 
-print(users)
+print('data is present ' + str(len(users) > 0))
 
 
-
-def getready():
+def open_whatsapp_and_authorize():
     try:
         global driver
-        driver =webdriver.Chrome(WD_PATH)
+        driver = webdriver.Chrome(service=Service(
+            ChromeDriverManager().install()))
 
         driver.get('https://web.whatsapp.com/')
         # wait till we get the access to search bar
         print("waiting for u to scan QR code ")
-        while(dr.check_xp(driver,'//*[@id="side"]/div[1]/div/label/div/div[2]')):
+        while (dr.check_xp(driver, '//*[@id="side"]/div[1]/div/div/div[2]/div')):
             time.sleep(3)
-        print("-"*20,"important log","-"*20)
+        print("-"*20, "important log", "-"*20)
     except Exception as e:
 
         print("update drivers https://chromedriver.chromium.org/downloads")
-        print("plz update your drivers")
+        print("plz update your drivers "+str(e))
         input()
         sys.exit()
 
-getready()
+
+open_whatsapp_and_authorize()
+print("sleeping for 20 seconds.....zzzzz")
+time.sleep(20)  # sleep for 20 seconds
+
 for usr in users[:]:
-
-    data={
-        'usr':usr['NAME'],
-        'dob':usr['DOB'],
-        'number':usr[dr.todaystr] #get number from todays date and find in the user dict
+    if (usr['NAME'] == ''):
+        continue
+    data = {
+        'usr': usr['NAME'],
+        'dob': usr['DOB'],
+        # get number from todays date and find in the user dict
+        'number': usr[dr.todaystr]
     }
-    finalmsg =dr.format_data(data)
+    finalmsg = dr.format_data(data)
 
-
-    # select search bar                 
-    search=driver.find_element_by_xpath('//*[@id="side"]/div[1]/div/label/div/div[2]')
+    # select search bar
+    search = driver.find_element(
+        by=By.XPATH, value='//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')
     search.click()
-    # select search bar 
+    # select search bar
+    time.sleep(2)
     search.send_keys(usr['NAME']+" ( MC )")
     search.send_keys(Keys.ENTER)
-
     try:
         # get the name of that user page
-        titlename=driver.find_element_by_xpath('//*[@id="main"]/header/div[2]/div/div/span').text.lower()
+        title_user_name = driver.find_element(
+            by=By.XPATH, value='//*[@id="main"]/header/div[2]/div/div/span').text.lower()
 
         # check if we are in that user page
-        if titlename == usr['NAME'].lower()+" ( mc )":
-            msg_box = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div/div/div[2]/div[1]/div/div[2]')
+        if title_user_name == usr['NAME'].lower()+" ( mc )":
+            msg_box = driver.find_element(
+                by=By.XPATH, value='//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]')
 
             # clipboard.copy(finalmsg)
             pyperclip.copy(finalmsg)
@@ -107,14 +125,18 @@ for usr in users[:]:
             print(f"Successfully sended message to {usr['NAME']}")
         else:
             print(f"{usr['NAME']} can't find on whatsapp")
+            file.write('\n======================= ' +
+                       usr['NAME']+' ========================== \n\n')
+            file.write(finalmsg)
+
     except Exception as e:
-        print(f"{usr['NAME']} can't find on whatsapperror",e)
-    
+        print(f"{usr['NAME']} can't find title whatsapperror")
+
     # first clear search bar for every user
-    for i in range(60):
-        search.send_keys(Keys.BACKSPACE)
+    search.send_keys(Keys.CONTROL, 'a')
+    search.send_keys(Keys.BACKSPACE)
     # first clear search bar for every user
 
-print("-"*20,"hey my work is done master","-"*20)
+print("-"*20, "hey my work is done master", "-"*20)
+file.close()
 input()
-
