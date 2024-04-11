@@ -1,18 +1,12 @@
+import os
+from pathlib import Path
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
-import io
-import sys
-import time
-import datetime
 import gspread
-import os
-import time
-import csv
-import clipboard
-import sys
-import inquirer
 import random
 from selenium.webdriver.common.by import By
+from dotenv import load_dotenv
+load_dotenv()
 
 # you can edit
 
@@ -20,18 +14,16 @@ SCOPE = ['https://www.googleapis.com/auth/drive',
          'https://spreadsheets.google.com/feeds']
 
 # files
-THE_JSON = "modules/keys.json"
-DEFAULT_MESSAGE = 'textmessage.txt'
-DIR = ""
+GCP_KEY=os.getenv('GCP_KEY')
+DEFAULT_MESSAGE=os.getenv('DEFAULT_MESSAGE')
 
-# data present on gdrive with this name
-COLOR_NUMBER = "SHEET_NAME"
-SHEET_NAME_DOB_DATE = "SHEET_NAME"
-SHORT_MESSAGE = "SHEET_NAME"
-DEFAULT_MESSAGE = "file.txt"
-DATE_SHEET = "SHEET_NAME"
-sm = {}
-# you can edit
+# data
+COLOR_NUMBER=os.getenv('COLOR_NUMBER')
+SHEET_NAME_DOB_DATE=os.getenv('SHEET_NAME_DOB_DATE')
+SHORT_MESSAGE=os.getenv('SHORT_MESSAGE')
+DATE_SHEET=os.getenv('DATE_SHEET')
+gsheet_messages={}
+# you can edit 
 
 
 class DriveAuth:
@@ -39,7 +31,7 @@ class DriveAuth:
         # Authorizing and getting data from gdrive
         print("Authorizing and getting data...")
         self.creds = ServiceAccountCredentials.from_json_keyfile_name(
-            THE_JSON, SCOPE)
+            GCP_KEY, SCOPE)
         self.client = gspread.authorize(self.creds)
 
         # greetings
@@ -59,7 +51,7 @@ class DriveAuth:
         print("getting short message....")
         self.shortM = self.get_data_sheet(SHORT_MESSAGE)
         for i in self.shortM:
-            sm[i["NUMBER"]] = i["MESSAGE"]
+            gsheet_messages[i["NUMBER"]] = i["MESSAGE"]
 
     def get_date(self, sheetName):
         sheet = self.client.open(sheetName).get_worksheet(1).get_all_records()
@@ -73,7 +65,7 @@ class DriveAuth:
     # open txt file and return the text
     def get_default_message(self, filename):
         try:
-            self.filedata = open(DIR+filename, 'r', encoding='utf-8')
+            self.filedata = open(""+filename, 'r', encoding='utf-8')
             return self.filedata.read()
         except Exception as e:
             print(e, "something went wrong with default msg read")
@@ -103,7 +95,7 @@ class DriveAuth:
 
     def get_msg_by_number(self, num):
         try:
-            return sm[num]
+            return gsheet_messages[num]
         except Exception as e:
             print(e, "can't find ", num)
 

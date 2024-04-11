@@ -1,13 +1,7 @@
 from modules.messageModule import DriveAuth
-from oauth2client.service_account import ServiceAccountCredentials
 from modules.messageModule import *
-import os
 import time
-import csv
-import clipboard
 import sys
-import inquirer
-import gspread
 import pyperclip
 
 from selenium import webdriver
@@ -16,25 +10,22 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
-# variable and sheet names
-SHEET_NAME_DOB_DATE = "SHEET_NAME"
-SHORT_MESSAGE = "SHEET_NAME"
-DEFAULT_MESSAGE = 'textmessage.txt'
-file = open('failed.txt', 'w', encoding="utf-8")
+# logs file variables
+file = open('logs/failed.txt', 'w', encoding="utf-8")
 file.write('FAILED MESSAGES\n')
-# variable and sheet names
+# logs file variables
 
 
 # test users
 # users=[{
-#     'NAME': 'Niap Pei Swan',
+#     'NAME': 'name1',
 #     'DOB': '',
 #     '26/04/2021': 1,
 #     '27/04/2021': 2,
 #     '28/04/2021': 3,
 #     '29/04/2021': 4
 # }, {
-#     'NAME': 'Adrian Watuna',
+#     'NAME': 'name2',
 #     'DOB': '',
 #     '26/04/2021': 2,
 #     '27/04/2021': 3,
@@ -51,16 +42,13 @@ file.write('FAILED MESSAGES\n')
 #     print(finalmsg)
 
 
-try:
-    dr = DriveAuth()
-except Exception as e:
-    print(e, "something happend in auth")
+dr = DriveAuth()
 
 # real uers
 users = dr.get_data_sheet(SHEET_NAME_DOB_DATE)
 
 
-print('data is present ' + str(len(users) > 0))
+print('Data is present ' + str(len(users) > 0))
 
 
 def open_whatsapp_and_authorize():

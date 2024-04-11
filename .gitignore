@@ -1,2 +1,6 @@
-.vscode/settings.json
+.vscode/
+.env
 modules/__pycache__/
+venv/
+logs/
+config/

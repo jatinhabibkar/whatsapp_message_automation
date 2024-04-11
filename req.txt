@@ -1,9 +1,11 @@
-gspread
-oauth2client
-clipboard
+gspread==4.0.1
+oauth2client==4.1.3
+clipboard==0.0.4
 google-api-python-client 
 google-auth-httplib2 
 google-auth-oauthlib
 clipboard
 selenium
 inquirer
+webdriver-manager
+python-dotenv
