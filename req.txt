@@ -7,5 +7,5 @@ google-auth-oauthlib
 clipboard
 selenium
 inquirer
-webdriver-manager
+webdriver-manager==4.0.2
 python-dotenv

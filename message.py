@@ -54,6 +54,7 @@ print('Data is present ' + str(len(users) > 0))
 def open_whatsapp_and_authorize():
     try:
         global driver
+        
         driver = webdriver.Chrome(service=Service(
             ChromeDriverManager().install()))
 
@@ -92,7 +93,7 @@ for usr in users[:]:
     search.click()
     # select search bar
     time.sleep(2)
-    search.send_keys(usr['NAME']+" ( MC )")
+    search.send_keys(str(usr['NAME'])+" ( MC )")
     search.send_keys(Keys.ENTER)
     try:
         # get the name of that user page
@@ -113,9 +114,8 @@ for usr in users[:]:
             print(f"Successfully sended message to {usr['NAME']}")
         else:
             print(f"{usr['NAME']} can't find on whatsapp")
-            file.write('\n======================= ' +
-                       usr['NAME']+' ========================== \n\n')
-            file.write(finalmsg)
+            file.write(str('\n======================= ' + usr['NAME']+' ========================== \n\n'))
+            file.write(str(finalmsg))
 
     except Exception as e:
         print(f"{usr['NAME']} can't find title whatsapperror")
