@@ -98,12 +98,12 @@ for usr in users[:]:
     try:
         # get the name of that user page
         title_user_name = driver.find_element(
-            by=By.XPATH, value='//*[@id="main"]/header/div[2]/div/div/span').text.lower()
+            by=By.XPATH, value='//*[@id="main"]/header/div[2]/div[1]/div/span').text.lower()
 
         # check if we are in that user page
         if title_user_name == usr['NAME'].lower()+" ( mc )":
             msg_box = driver.find_element(
-                by=By.XPATH, value='//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]')
+                by=By.XPATH, value='//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]')
 
             # clipboard.copy(finalmsg)
             pyperclip.copy(finalmsg)
@@ -118,7 +118,7 @@ for usr in users[:]:
             file.write(str(finalmsg))
 
     except Exception as e:
-        print(f"{usr['NAME']} can't find title whatsapperror")
+        print(e,f"{usr['NAME']} can't find title whatsapperror")
 
     # first clear search bar for every user
     search.send_keys(Keys.CONTROL, 'a')
