@@ -61,7 +61,7 @@ def open_whatsapp_and_authorize():
         driver.get('https://web.whatsapp.com/')
         # wait till we get the access to search bar
         print("waiting for u to scan QR code ")
-        while (dr.check_xp(driver, '//*[@id="side"]/div[1]/div/div/div[2]/div')):
+        while (dr.check_xp(driver, '//*[@id="side"]/div[1]/div/div[2]/div/div/div[1]/p')):
             time.sleep(3)
         print("-"*20, "important log", "-"*20)
     except Exception as e:
@@ -88,8 +88,7 @@ for usr in users[:]:
     finalmsg = dr.format_data(data)
 
     # select search bar
-    search = driver.find_element(
-        by=By.XPATH, value='//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')
+    search = driver.find_element(by=By.XPATH, value='//*[@id="side"]/div[1]/div/div[2]/div/div/div/p')
     search.click()
     # select search bar
     time.sleep(2)
@@ -97,6 +96,9 @@ for usr in users[:]:
     search.send_keys(Keys.ENTER)
     try:
         # get the name of that user page
+
+        # title_user_name = driver.find_element(
+        #     by=By.XPATH, value='//*[@id="main"]/header/div[2]/div/div/div/span').text.lower()  // other system
         title_user_name = driver.find_element(
             by=By.XPATH, value='//*[@id="main"]/header/div[2]/div[1]/div/span').text.lower()
 
@@ -118,8 +120,9 @@ for usr in users[:]:
             file.write(str(finalmsg))
 
     except Exception as e:
-        print(e,f"{usr['NAME']} can't find title whatsapperror")
-
+        print(f"{usr['NAME']} can't find title whatsapperror")
+    time.sleep(4)
+    search = driver.find_element(by=By.XPATH, value='//*[@id="side"]/div[1]/div/div[2]/div/div/div/p')
     # first clear search bar for every user
     search.send_keys(Keys.CONTROL, 'a')
     search.send_keys(Keys.BACKSPACE)
