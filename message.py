@@ -1,3 +1,4 @@
+from os import wait
 from modules.messageModule import DriveAuth
 from modules.messageModule import *
 import time
@@ -7,14 +8,24 @@ import pyperclip
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 # logs file variables
 file = open('logs/failed.txt', 'w', encoding="utf-8")
 file.write('FAILED MESSAGES\n')
 # logs file variables
 
+
+# xpath 
+SEARCH_BOX_XPATH = '//*[@id="side"]/div[1]/div/div[2]/div/div/div/p'
+TITLE_NAME_XPATH = '//*[@id="main"]/header/div[2]/div[1]/div/span'
+MESSAGE_BOX_XPATH = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]'
 
 # test users
 # users=[{
@@ -54,14 +65,15 @@ print('Data is present ' + str(len(users) > 0))
 def open_whatsapp_and_authorize():
     try:
         global driver
-        
-        driver = webdriver.Chrome(service=Service(
-            ChromeDriverManager().install()))
-
+        options = Options()
+        firefox_profile = FirefoxProfile()
+        firefox_profile.set_preference("javascript.enabled", True)
+        options.profile = firefox_profile
+        driver = webdriver.Firefox(options=options)
         driver.get('https://web.whatsapp.com/')
         # wait till we get the access to search bar
         print("waiting for u to scan QR code ")
-        while (dr.check_xp(driver, '//*[@id="side"]/div[1]/div/div[2]/div/div/div[1]/p')):
+        while (dr.check_xp(driver, SEARCH_BOX_XPATH)):
             time.sleep(3)
         print("-"*20, "important log", "-"*20)
     except Exception as e:
@@ -88,24 +100,21 @@ for usr in users[:]:
     finalmsg = dr.format_data(data)
 
     # select search bar
-    search = driver.find_element(by=By.XPATH, value='//*[@id="side"]/div[1]/div/div[2]/div/div/div/p')
+    search = driver.find_element(by=By.XPATH, value=SEARCH_BOX_XPATH)
     search.click()
     # select search bar
     time.sleep(2)
-    search.send_keys(str(usr['NAME'])+" ( MC )")
-    search.send_keys(Keys.ENTER)
+    ActionChains(driver).move_to_element(search).click().send_keys(str(usr['NAME'])+" ( MC )").send_keys(Keys.ENTER).perform()
     try:
         # get the name of that user page
 
         # title_user_name = driver.find_element(
         #     by=By.XPATH, value='//*[@id="main"]/header/div[2]/div/div/div/span').text.lower()  // other system
-        title_user_name = driver.find_element(
-            by=By.XPATH, value='//*[@id="main"]/header/div[2]/div[1]/div/span').text.lower()
+        title_user_name = driver.find_element(by=By.XPATH, value=TITLE_NAME_XPATH).text.lower()
 
         # check if we are in that user page
         if title_user_name == usr['NAME'].lower()+" ( mc )":
-            msg_box = driver.find_element(
-                by=By.XPATH, value='//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]')
+            msg_box = driver.find_element(by=By.XPATH, value=MESSAGE_BOX_XPATH)
 
             # clipboard.copy(finalmsg)
             pyperclip.copy(finalmsg)
@@ -121,11 +130,16 @@ for usr in users[:]:
 
     except Exception as e:
         print(f"{usr['NAME']} can't find title whatsapperror")
-    time.sleep(4)
-    search = driver.find_element(by=By.XPATH, value='//*[@id="side"]/div[1]/div/div[2]/div/div/div/p')
+    search = driver.find_element(by=By.XPATH, value=SEARCH_BOX_XPATH)
     # first clear search bar for every user
-    search.send_keys(Keys.CONTROL, 'a')
-    search.send_keys(Keys.BACKSPACE)
+    ActionChains(driver)\
+    .move_to_element(search)\
+    .click()\
+    .key_down(Keys.CONTROL)\
+    .send_keys('a')\
+    .key_up(Keys.CONTROL)\
+    .key_down(Keys.BACKSPACE)\
+    .perform()
     # first clear search bar for every user
 
 print("-"*20, "hey my work is done master", "-"*20)
