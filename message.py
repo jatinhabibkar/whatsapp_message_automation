@@ -1,4 +1,3 @@
-from os import wait
 from modules.messageModule import DriveAuth
 from modules.messageModule import *
 import time
@@ -8,12 +7,8 @@ import pyperclip
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 # logs file variables
@@ -23,10 +18,9 @@ file.write('FAILED MESSAGES\n')
 
 
 # xpath 
-SEARCH_BOX_XPATH = '//*[@id="side"]/div[1]/div/div[2]/div/div/div/p'
-TITLE_NAME_XPATH = '//*[@id="main"]/header/div[2]/div[1]/div/span'
-MESSAGE_BOX_XPATH = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]'
-
+SEARCH_BOX_XPATH = '//*[@role="textbox" and @aria-label="Search input textbox"]'
+TITLE_NAME_XPATH = lambda user_name:f'//*[@id="main"]/descendant::*[contains(normalize-space(text()), "{user_name}")]'
+MESSAGE_BOX_XPATH = '//*[@role="textbox" and @aria-label="Type a message"]'
 # test users
 # users=[{
 #     'NAME': 'name1',
@@ -65,11 +59,8 @@ print('Data is present ' + str(len(users) > 0))
 def open_whatsapp_and_authorize():
     try:
         global driver
-        options = Options()
-        firefox_profile = FirefoxProfile()
-        firefox_profile.set_preference("javascript.enabled", True)
-        options.profile = firefox_profile
-        driver = webdriver.Firefox(options=options)
+        driver = webdriver.Chrome(service=Service(
+            ChromeDriverManager().install()))
         driver.get('https://web.whatsapp.com/')
         # wait till we get the access to search bar
         print("waiting for u to scan QR code ")
@@ -107,10 +98,7 @@ for usr in users[:]:
     ActionChains(driver).move_to_element(search).click().send_keys(str(usr['NAME'])+" ( MC )").send_keys(Keys.ENTER).perform()
     try:
         # get the name of that user page
-
-        # title_user_name = driver.find_element(
-        #     by=By.XPATH, value='//*[@id="main"]/header/div[2]/div/div/div/span').text.lower()  // other system
-        title_user_name = driver.find_element(by=By.XPATH, value=TITLE_NAME_XPATH).text.lower()
+        title_user_name = driver.find_element(by=By.XPATH, value=TITLE_NAME_XPATH(str(usr['NAME'])+" ( MC )")).text.lower()
 
         # check if we are in that user page
         if title_user_name == usr['NAME'].lower()+" ( mc )":
@@ -129,7 +117,7 @@ for usr in users[:]:
             file.write(str(finalmsg))
 
     except Exception as e:
-        print(f"{usr['NAME']} can't find title whatsapperror")
+        print(f"""[{str(usr['NAME'])+" ( MC )"}] check spelling on whatsapp phone""")
     search = driver.find_element(by=By.XPATH, value=SEARCH_BOX_XPATH)
     # first clear search bar for every user
     ActionChains(driver)\
